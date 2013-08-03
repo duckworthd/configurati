@@ -1,0 +1,10 @@
+import pprint
+import os
+
+from configuratti import configure
+
+directory   = os.path.split(os.path.abspath(__file__))[0]
+config_path = os.path.join(directory, 'config.py')
+spec_path   = os.path.join(directory, 'spec.py')
+config      = configure(config_path, spec_path)
+pprint.pprint(config)
