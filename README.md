@@ -120,7 +120,7 @@ Defining a configuration format specification allows one several benefits,
 `spec.py`
 
 ```python
-from configuratti import optional, required
+from configuratti import optional, required, load_spec, import_spec
 
 # required variables
 int_variable = required(type=int, help="An integer variable")
@@ -143,6 +143,10 @@ dict_variable = {
       'inner_dict_key': (required(type=int), required(type=str)),
     }
 }
+
+### import another specification file's contents
+# import_spec('spec2.py')
+# spec2 = load_spec('spec2.py')
 ```
 
 `config.py`

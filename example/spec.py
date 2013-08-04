@@ -1,6 +1,6 @@
 import os
 
-from configurati import optional, required
+from configurati import optional, required, import_spec
 
 
 # define required variables with type coercion
@@ -34,12 +34,5 @@ tuple_variable = (
     required(type=str, help="third tuple variable"),
 )
 
-# a dict variable contains keys to variables, potentially with nesting.
-dict_variable = {
-    'str_key': required(type=str),
-    'list_key': [required(type=int)],
-    'dict_key': {
-      'key1': required(),
-      'key2': optional(type=int, default=-1),
-    }
-}
+# merge this file with another spec
+import_spec('spec2.py')

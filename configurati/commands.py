@@ -37,9 +37,9 @@ def load_config(path, relative_to_caller=False):
   return variables
 
 
-def load_spec(path):
+def load_spec(path, relative_to_caller=False):
   """Load a configuration specification"""
-  spec = load_config(path)
+  spec = load_config(path, relative_to_caller=relative_to_caller)
   spec = { k:v for k,v in spec.items()
            if is_spec(v) }
   return spec
@@ -57,6 +57,12 @@ def import_config(path, relative_to_caller=True):
       from which this method is called.
   """
   variables = load_config(path, relative_to_caller=relative_to_caller)
+  _add_globals(**variables)
+
+
+def import_spec(path, relative_to_caller=True):
+  """Import another specification's contents into the environment"""
+  variables = load_spec(path, relative_to_caller=relative_to_caller)
   _add_globals(**variables)
 
 
