@@ -165,3 +165,12 @@ def validate(spec, config):
         return spec.type(config)
       except ValueError as e:
         raise ValidationError("Type conversion failure")
+
+
+def one_of(**options):
+  """is this object one of these options?"""
+  def type(obj):
+    if not obj in options:
+      raise ValueError("%s isn't one of %s" % (obj, options))
+    return obj
+  return type

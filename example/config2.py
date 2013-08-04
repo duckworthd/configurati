@@ -1,5 +1,7 @@
+from configuratti import env
 
-str_variable = "str_variable"
+# use env to load environment variables
+str_variable = env('USER')
 int_variable = "1234567890"   # apply type coercion
 untyped_variable = lambda: "Hello, World!"
 

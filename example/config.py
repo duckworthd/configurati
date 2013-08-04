@@ -1,11 +1,13 @@
 import os
 
-from configuratti import import_config
+from configuratti import import_config, load_config
 
 
 # import another configuration file's contents
-folder = os.path.split(os.path.abspath(__file__))[0]
-import_config(os.path.join(folder, "config2.py"))
+import_config('config2.py')
+
+# or load it in directory
+other_config = load_config('config2.py', relative_to_caller=True)
 
 # this is real python -- use real python!
 required_list_variable = list(range(10))
