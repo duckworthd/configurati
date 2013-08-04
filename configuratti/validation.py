@@ -14,6 +14,25 @@ class variable(object):
 
 
 class optional(variable):
+  """An optional variable
+
+  Used in a spec file to denote a variable that has a default value and may be
+  left unspecified in a config file.
+
+  >>> version = optional(default="1.0-SNAPSHOT", \
+                         help="Version of this application")
+
+  Parameters
+  ----------
+  name : str
+      human readable variable name
+  type : function
+      function to coerce argument to desired type
+  help : str
+      long description of this variable
+  default : object
+      default value to use if this variable isn't in the config.
+  """
   def __init__(self, name=None, type=str, help=None, default=None):
     super(optional, self).__init__(name, type, help)
     self.default = default
@@ -26,6 +45,20 @@ class optional(variable):
 
 
 class required(variable):
+  """A required variable
+
+  Used in a spec file to denote a variable that must be in a valid config file.
+  If a required variable is not in a config file, validation will fail.
+
+  Parameters
+  ----------
+  name : str
+      human readable variable name
+  type : function
+      function to coerce argument to desired type
+  help : str
+      long description of this variable
+  """
   def __init__(self, name=None, type=str, help=None):
     super(required, self).__init__(name, type, help)
 
@@ -37,11 +70,13 @@ class required(variable):
 
 
 def is_required(obj):
+  """Is this a required variable?"""
   return is_collection(obj) \
       or isinstance(obj, required)
 
 
 def is_spec(obj):
+  """Is this a valid specification variable?"""
   return is_collection(obj) \
       or isinstance(obj, variable)
 
@@ -52,10 +87,20 @@ def is_collection(obj):
       or isinstance(obj, tuple)
 
 
+class ValidationError(Exception):
+  def __init__(self, msg, path=''):
+    super(ValidationError, self).__init__("%s (%s)" % (msg, path[1:]))
+    self.msg  = msg
+    self.path = path
+
+  def extend_path(self, path):
+    return ValidationError(path=(path + self.path), msg=self.msg)
+
+
 def validate(spec, config):
-  """Validate a configuration against a spec"""
-  if is_required(spec):
-    assert config is not None, "Missing required argument: %s" % str(spec)
+  """Validate a configuration file against a spec"""
+  if is_required(spec) and config is None:
+    raise ValidationError("Missing required argument")
 
   # unpack optional collection
   if isinstance(spec, variable) and is_collection(spec.type):
@@ -67,31 +112,58 @@ def validate(spec, config):
     elif isinstance(spec, required):
       spec = spec.type
     else:
-      raise TypeError()
+      raise ValidationError(msg="Unrecognized variable type: %s" % str(type(spec)))
 
   if isinstance(spec, dict):
     if not isinstance(config, dict):
-      raise TypeError()
+      raise ValidationError("Improper object type (expected dict)")
     result = {}
     for k, v in spec.items():
-      result[k] = validate(v, config.get(k, None))
+      try:
+        result[k] = validate(v, config.get(k, None))
+      except ValidationError as e:
+        raise e.extend_path(".%s" % k)
     return result
 
   if isinstance(spec, list):
     if not isinstance(config, list):
-      raise TypeError()
-    return [validate(spec[0], v) for v in config]
+      raise ValidationError("Improper object type (expected list)")
+    result = []
+    for i, v in enumerate(config):
+      try:
+        result.append(validate(spec[0], v))
+      except ValidationError as e:
+        raise e.extend_path("[%d]" % i)
+    return result
 
   if isinstance(spec, tuple):
-    if not (isinstance(config, tuple) and len(spec) == len(config)):
-      raise TypeError()
-    return tuple([validate(s, v) for s, v in zip(spec, config)])
+    if not isinstance(config, tuple):
+      raise ValidationError("Improper object type (expected tuple)")
+    if not len(spec) == len(config):
+      raise ValidationError("Incorrect tuple length (expected %d; found %d)" % \
+          (len(spec), len(config)))
+    result = []
+    for i, (s, v) in enumerate(zip(spec,config)):
+      try:
+        result.append(validate(s, v))
+      except ValidationError as e:
+        raise e.extend_path("[%d]" % i)
+    return tuple(result)
 
   if isinstance(spec, required):
-    return spec.type(config)
+    if config is None:
+      raise ValidationError("Missing required argument")
+    else:
+      try:
+        return spec.type(config)
+      except ValueError as e:
+        raise ValidationError("Type conversion failure")
 
   if isinstance(spec, optional):
     if spec is None:
       return spec.default
     else:
-      return spec.type(config)
+      try:
+        return spec.type(config)
+      except ValueError as e:
+        raise ValidationError("Type conversion failure")

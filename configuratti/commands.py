@@ -1,38 +1,18 @@
 """
-Configuratti: a configuration library for Python
+Commands for
 """
 import imp
 import json
 import os
 import sys
 
-from .validation import validate, is_spec
-
-import configuratti
-
-
-class attrs(dict):
-  """A dict you can access with dot notation"""
-
-  def __getattr__(self, key):
-    return self[key]
-
-  @staticmethod
-  def from_dict(d):
-    if isinstance(d, dict):
-      result = attrs( (k, attrs.from_dict(v)) for (k, v) in d.items() )
-    elif isinstance(d, list):
-      result = [attrs.from_dict(v) for v in d]
-    elif isinstance(d, tuple):
-      result = tuple([attrs.from_dict(v) for v in d])
-    else:
-      result = d
-    return result
+from .attrs import attrs
+from .validation import validate, is_spec, ValidationError
 
 
 def load_config(path):
   """Load a config module as a dict"""
-  module = imp.load_source('', path)
+  module = imp.load_source(os.path.split(path)[1], path)
   variables = {
       k:getattr(module, k) for k in dir(module)
       if not '__' in k
@@ -72,25 +52,18 @@ def env(variable_name, type=str):
   return type(os.environ[variable_name])
 
 
-def configure(config='config.py', spec='spec.py'):
+def configure(config_path='config.py', spec_path='spec.py'):
   """Initialize configuration"""
   # load configuration file, if one was specified
-  config = load_config(config)
+  config = load_config(config_path)
 
   # override config file with command line args
   args = _eat_command_line_arguments()
   config.update(args)
 
   # validate the config
-  spec = load_spec(spec)
+  spec   = load_spec(spec_path)
   config = validate(spec, config)
-
-  # TODO remove imported stuff somehow?
-  for k in dir(configuratti):
-    if k in args:
-      del args[k]
-  if 'configuratti' in args:
-    del args['configuratti']
 
   return attrs.from_dict(config)
 

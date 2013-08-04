@@ -1,5 +1,4 @@
 from configuratti import optional, required, import_config
-# TODO these end up in the loaded config
 
 
 name        = required(help='Name of project')
