@@ -14,6 +14,8 @@ Format
 Configuration files are just normal Python modules. All variables in the
 configuration file's namespace will be loaded.
 
+`config.py`
+
 ```python
 from configuratti import env
 
@@ -33,6 +35,8 @@ dict_variable = {
 Configuration files are loaded with `configuratti.configure` and access with
 dot and bracket notation,
 
+`application.py`
+
 ```python
 from configuratti import configure
 
@@ -48,6 +52,8 @@ Command Line Overrides
 You can override parts of configuration files directly from the command line,
 even in nested collections, with any valid python expression,
 
+`config.py`
+
 ```python
 int_variable      = 1234567890
 function_variable = lambda: "Hello, World!"
@@ -61,16 +67,20 @@ list_variable = [
 ]
 ```
 
-```bash
-$ python -m configtest.py --int_variable 0 '--list_variable[1]' '{"key": "new value"}'
-```
+`application.py`
 
 ```python
 from configuratti import configure
 
 config = configure('config.py')
-config.int_variable                 # 0
+config.int_variable       # 0
 config.list_variable[1]   # {'key': 'new value'}
+```
+
+`command line`
+
+```bash
+$ python -m application.py --int_variable 0 '--list_variable[1]' '{"key": "new value"}'
 ```
 
 Merging configs
@@ -79,6 +89,8 @@ Merging configs
 Combine multiple configuration files by importing their entire contents into
 the calling configuration file,
 
+`config.py`
+
 ```python
 from configuratti import import_config
 
@@ -86,6 +98,8 @@ import_config('other_config.py')
 ```
 
 or by importing other configuration files as `dict`s,
+
+`config.py`
 
 ```python
 from configuratti import load_config
@@ -102,6 +116,8 @@ Defining a configuration format specification allows one several benefits,
 + default values for optional variables
 + removing un-specified variables from configuration file (e.g. imports,
   temporary variables, etc)
+
+`spec.py`
 
 ```python
 from configuratti import optional, required
@@ -129,6 +145,8 @@ dict_variable = {
 }
 ```
 
+`config.py`
+
 ```python
 # int_variable will be coerced to an int
 int_variable = '123'
@@ -149,6 +167,8 @@ dict_variable = {
   }
 }
 ```
+
+`application.py`
 
 ```
 from configuratti import configure
