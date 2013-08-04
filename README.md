@@ -27,7 +27,7 @@ dict_variable = {
   'list_key' : [1,2,3,4,5],
   'dict_key' : {
     'key1' : 123,
-    'key2  : (0, 1, 'SNAPSHOT'),
+    'key2'  : (0, 1, 'SNAPSHOT'),
   }
 }
 ```
@@ -58,12 +58,8 @@ even in nested collections, with any valid python expression,
 int_variable      = 1234567890
 function_variable = lambda: "Hello, World!"
 list_variable = [
-  {
-    'key': 'value1'
-  },
-  {
-    'key': 'value2'
-  }
+  { 'key': 'value1' },
+  { 'key': 'value2' },
 ]
 ```
 
@@ -80,7 +76,7 @@ config.list_variable[1]   # {'key': 'new value'}
 `command line`
 
 ```bash
-$ python -m application.py --int_variable 0 '--list_variable[1]' '{"key": "new value"}'
+$ python -m application.py '--int_variable' '0' '--list_variable[1]' '{"key": "new value"}'
 ```
 
 Merging configs
