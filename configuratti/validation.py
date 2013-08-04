@@ -2,10 +2,12 @@
 Tools for validating a configuration spec
 """
 
+def identity(x):
+  return x
+
 
 class variable(object):
-  def __init__(self, name=None, type=str, help=None):
-    self.name = name
+  def __init__(self, type=str, help=None):
     self.type = type
     self.help = help
 
@@ -24,8 +26,6 @@ class optional(variable):
 
   Parameters
   ----------
-  name : str
-      human readable variable name
   type : function
       function to coerce argument to desired type
   help : str
@@ -33,14 +33,14 @@ class optional(variable):
   default : object
       default value to use if this variable isn't in the config.
   """
-  def __init__(self, name=None, type=str, help=None, default=None):
-    super(optional, self).__init__(name, type, help)
+  def __init__(self, type=identity, help=None, default=None):
+    super(optional, self).__init__(type, help)
     self.default = default
 
   def __str__(self):
     return (
-        "optional(name=%s, type=%s, help=%s, default=%s)" %
-        (self.name, self.type, self.help, self.default)
+        "optional(type=%s, help=%s, default=%s)" %
+        (self.type, self.help, self.default)
     )
 
 
@@ -52,20 +52,18 @@ class required(variable):
 
   Parameters
   ----------
-  name : str
-      human readable variable name
   type : function
       function to coerce argument to desired type
   help : str
       long description of this variable
   """
-  def __init__(self, name=None, type=str, help=None):
-    super(required, self).__init__(name, type, help)
+  def __init__(self, type=identity, help=None):
+    super(required, self).__init__(type, help)
 
   def __str__(self):
     return (
-        "required(name=%s, type=%s, help=%s)" %
-        (self.name, self.type, self.help)
+        "required(type=%s, help=%s)" %
+        (self.type, self.help)
     )
 
 
@@ -160,7 +158,7 @@ def validate(spec, config):
         raise ValidationError("Type conversion failure")
 
   if isinstance(spec, optional):
-    if spec is None:
+    if config is None:
       return spec.default
     else:
       try:

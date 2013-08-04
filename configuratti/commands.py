@@ -5,6 +5,7 @@ import imp
 import json
 import os
 import sys
+import uuid
 
 from .attrs import attrs
 from .validation import validate, is_spec, ValidationError
@@ -12,7 +13,8 @@ from .validation import validate, is_spec, ValidationError
 
 def load_config(path):
   """Load a config module as a dict"""
-  module = imp.load_source(os.path.split(path)[1], path)
+  modname = str(uuid.uuid4())
+  module = imp.load_source(modname, path)
   variables = {
       k:getattr(module, k) for k in dir(module)
       if not '__' in k
@@ -36,20 +38,18 @@ def import_config(path):
       path of other configuration file
   """
   variables = load_config(path)
-  _add_globals(variables)
+  _add_globals(**variables)
 
 
-def env(variable_name, type=str):
+def env(variable_name):
   """Load an environment variable
 
   Parameters
   ----------
   variable_name : str
       environment variable name
-  type : function
-      convert variable to correct type
   """
-  return type(os.environ[variable_name])
+  return os.environ[variable_name]
 
 
 def configure(config_path='config.py', spec_path='spec.py'):
@@ -84,8 +84,8 @@ def _eat_command_line_arguments():
         'Command line options must be of the form "--key value'
     key = args[i][2:]
     try:
-      value = json.loads(args[i+1])
-    except ValueError:
+      value = eval(args[i+1])
+    except NameError:
       value = args[i+1]
     result[key] = value
     i += 2
@@ -101,4 +101,4 @@ def _add_globals(**kwargs):
 
   # update environment of said frame
   glob = sys._getframe(i).f_globals
-  glob.update(d)
+  glob.update(kwargs)

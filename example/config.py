@@ -1,37 +1,29 @@
+import os
 
-name = 'Test Project'
-version = 0.1
-age = 10
+from configuratti import import_config
 
-### default value used here
-# database = {
-#   'port': 1000,
-#   'address': '192.168.0.1'
-# }
 
-selectors = [
-    {
-      'uri': 'amazon.com',
-      'gold': {
-        'price': 12.90,
-        'product_name': 'Diapers'
-      },
-      'version': (0,0),
-    },
-    {
-      'uri': 'amazon.com',
-      'gold': {
-        'price': 0.99,
-        'product_name': 'candy'
-      },
-      'version': (0,0),
-    },
-    {
-      'uri': 'newegg.com',
-      'gold': {
-        'price': 15.0,
-        'product_name': 'headphones'
-      },
-      'version': (0,0),
-    },
-]
+# import another configuration file's contents
+folder = os.path.split(os.path.abspath(__file__))[0]
+import_config(os.path.join(folder, "config2.py"))
+
+# this is real python -- use real python!
+required_list_variable = list(range(10))
+optional_list_variable = list(reversed(range(10)))
+
+### This tuple has the wrong length; This would crash!
+# tuple_variable = (1, 2.0, "3", 4)
+tuple_variable = (1, 2.0, "3")
+
+dict_variable = {
+  'str_key': "I'm a dict variable!",
+  'list_key': [], # empty list variable
+  'dict_key': {
+    'key1': 123,
+    # 'key2: 456  # this key is optional
+  }
+}
+
+# if a variable appears in a config but not in the spec, it
+# will not be loaded.
+ignored_variable = "wut."
