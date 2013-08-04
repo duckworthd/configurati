@@ -1,7 +1,7 @@
 import pprint
 import os
 
-from configuratti import configure
+from configurati import configure
 
 
 directory   = os.path.split(os.path.abspath(__file__))[0]

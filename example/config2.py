@@ -1,4 +1,4 @@
-from configuratti import env
+from configurati import env
 
 # use env to load environment variables
 str_variable = env('USER')

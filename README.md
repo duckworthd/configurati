@@ -62,7 +62,7 @@ list_variable = [
 ```
 
 ```bash
-$ python -m configtest.py --int_variable 0 --list_variable[1] '{"key": "new value"}'
+$ python -m configtest.py --int_variable 0 '--list_variable[1]' '{"key": "new value"}'
 ```
 
 ```python

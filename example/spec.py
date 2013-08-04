@@ -1,6 +1,6 @@
 import os
 
-from configuratti import optional, required
+from configurati import optional, required
 
 
 # define required variables with type coercion

@@ -1,6 +1,6 @@
 import os
 
-from configuratti import import_config, load_config
+from configurati import import_config, load_config
 
 
 # import another configuration file's contents
