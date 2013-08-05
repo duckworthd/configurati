@@ -81,6 +81,7 @@ def env(variable_name):
 def update_config(old, new):
   def _split(k):
     # .a.b.c -> (a, b.c)
+    # .1.b.c -> (1, b.c)
     # [1].b[2].c -> (1, .b[2].c)
     # .a -> (a, '')
     # [1] -> (1, '')
@@ -100,6 +101,10 @@ def update_config(old, new):
       else:
         rest = k[match.end()-1:]
       rest = _split(rest)
+      try:
+        start = int(start)
+      except ValueError:
+        pass
       return [start] + rest
     else:
       wtf

@@ -103,10 +103,11 @@ def test_command_line_override():
     """
   )
 
-  config = write_and_load(["--a", "2", "--b.c[-1]", "5"], config_text=config_text)
+  config = write_and_load(["--a", "2", "--b.c[-1]", "5", "--b.c.-2", "100"], config_text=config_text)
 
   assert config.a == 2
   assert config.b.c[-1] == 5
+  assert config.b.c[-2] == 100
 
 
 def test_variable():
