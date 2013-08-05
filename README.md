@@ -1,15 +1,25 @@
-configurati
+`configurati`
 ============
 
-configurati is a configuration file library for python,
+`configurati` is a configuration file library for python,
 
 + config files are just normal Python modules
 + command-line overrides of configuration file variables
 + configuration file verification, including optional variables, type coercion,
   and collections
 
-Format
-------
+Installation
+------------
+
+`configurati` can be install from [PyPi](https://pypi.python.org/pypi/configurati/0.1) via `pip` or `easy_install`
+
+```bash
+$ easy_install configurati
+$ pip install configurati
+```
+
+Config Format
+-------------
 
 Configuration files are just normal Python modules. All variables in the
 configuration file's namespace will be loaded.
@@ -40,7 +50,7 @@ dot and bracket notation,
 ```python
 from configurati import configure
 
-config = configure('config.py')
+config = configure(config_path='config.py')
 config.int_variable                     # 1234567890
 config.dict_variable.list_key[-1]       # 5
 config['dict_variable']['list_key'][-1] # 5
@@ -68,7 +78,7 @@ list_variable = [
 ```python
 from configurati import configure
 
-config = configure('config.py')
+config = configure(config_path='config.py')
 config.int_variable       # 0
 config.list_variable[1]   # {'key': 'new value'}
 ```
@@ -76,7 +86,7 @@ config.list_variable[1]   # {'key': 'new value'}
 `command line`
 
 ```bash
-$ python application.py '--int_variable' '0' '--list_variable[1]' '{"key": "new value"}'
+$ python application.py '--int_variable' '0' '--list_variable[1].key' '"new value"'
 ```
 
 Merging configs
@@ -173,7 +183,7 @@ dict_variable = {
 ```
 from configurati import configure
 
-config = configure('config.py', 'spec.py')
+config = configure(config_path='config.py', spec_path='spec.py')
 config.int_variable            # 123
 config.optional_float_variable # 1.0
 config.dict_variable.list_key  # []
