@@ -1,7 +1,7 @@
-configuratti
+configurati
 ============
 
-configuratti is a configuration file library for python,
+configurati is a configuration file library for python,
 
 + config files are just normal Python modules
 + command-line overrides of configuration file variables
@@ -17,7 +17,7 @@ configuration file's namespace will be loaded.
 `config.py`
 
 ```python
-from configuratti import env
+from configurati import env
 
 int_variable          = 1234567890
 function_variable     = lambda: "Hello, World!"
@@ -32,13 +32,13 @@ dict_variable = {
 }
 ```
 
-Configuration files are loaded with `configuratti.configure` and access with
+Configuration files are loaded with `configurati.configure` and access with
 dot and bracket notation,
 
 `application.py`
 
 ```python
-from configuratti import configure
+from configurati import configure
 
 config = configure('config.py')
 config.int_variable                     # 1234567890
@@ -66,7 +66,7 @@ list_variable = [
 `application.py`
 
 ```python
-from configuratti import configure
+from configurati import configure
 
 config = configure('config.py')
 config.int_variable       # 0
@@ -88,7 +88,7 @@ the calling configuration file,
 `config.py`
 
 ```python
-from configuratti import import_config
+from configurati import import_config
 
 import_config('other_config.py')
 ```
@@ -98,7 +98,7 @@ or by importing other configuration files as `dict`s,
 `config.py`
 
 ```python
-from configuratti import load_config
+from configurati import load_config
 
 other_config = load_config('other_config.py')
 ```
@@ -116,7 +116,7 @@ Defining a configuration format specification allows one several benefits,
 `spec.py`
 
 ```python
-from configuratti import optional, required, load_spec, import_spec
+from configurati import optional, required, load_spec, import_spec
 
 # required variables
 int_variable = required(type=int, help="An integer variable")
@@ -171,7 +171,7 @@ dict_variable = {
 `application.py`
 
 ```
-from configuratti import configure
+from configurati import configure
 
 config = configure('config.py', 'spec.py')
 config.int_variable            # 123

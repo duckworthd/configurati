@@ -139,13 +139,16 @@ def update_config(old, new):
   return old
 
 
-def configure(config_path='config.py', spec_path=None):
+def configure(args=None, config_path=None, spec_path=None):
   """Initialize configuration"""
   # load configuration file, if one was specified
-  config = load_config(config_path)
+  if config_path is not None:
+    config = load_config(config_path)
+  else:
+    config = {}
 
   # override config file with command line args
-  args   = _eat_command_line_arguments()
+  args   = _eat_command_line_arguments(args)
   config = update_config(config, args)
 
   # validate the config
@@ -156,7 +159,7 @@ def configure(config_path='config.py', spec_path=None):
   return attrs.from_dict(config)
 
 
-def _eat_command_line_arguments():
+def _eat_command_line_arguments(args=None):
   """Turn command line args into key-value pairs
 
   Assume command line args are of the form
@@ -165,8 +168,9 @@ def _eat_command_line_arguments():
   values must be valid python expressions
   """
   result = {}
-  args   = sys.argv[1:]
-  i      = 0
+  if args is None:
+    args = sys.argv[1:]
+  i = 0
   while i < len(args):
     assert args[i].startswith('--'), \
         'Command line options must be of the form "--key value'
