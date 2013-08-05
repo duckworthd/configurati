@@ -65,7 +65,7 @@ def test_collection_config():
     """
     a = [1,2,3]
     b = (3,4,5)
-    c = {"six": 6, "seven": 7, "eight": 8}
+    c = {"six": 6, "seven": 7, "eight-nine": 89}
     """
   )
 
@@ -73,7 +73,9 @@ def test_collection_config():
 
   assert config.a == [1,2,3]
   assert config.b == (3,4,5)
-  assert config.c == {"six": 6, "seven": 7, "eight": 8}
+  assert config.c.six == 6
+  assert config.c.seven == 7
+  assert config.c.eight_nine == 89
 
 
 def test_env():

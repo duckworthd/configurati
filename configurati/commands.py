@@ -10,6 +10,7 @@ import uuid
 
 from .attrs import attrs
 from .validation import validate, is_spec, ValidationError
+from .utils import normalize_keys
 
 
 def load_config(path, relative_to_caller=False):
@@ -34,7 +35,7 @@ def load_config(path, relative_to_caller=False):
       k:getattr(module, k) for k in dir(module)
       if not '__' in k
   }
-  return variables
+  return normalize_keys(variables)
 
 
 def load_spec(path, relative_to_caller=False):
@@ -181,7 +182,7 @@ def _eat_command_line_arguments(args=None):
       value = args[i+1]
     result[key] = value
     i += 2
-  return result
+  return normalize_keys(result)
 
 
 def _add_globals(**kwargs):

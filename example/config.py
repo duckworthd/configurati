@@ -18,7 +18,8 @@ optional_list_variable = list(reversed(range(10)))
 tuple_variable = (1, 2.0, "3")
 
 dict_variable = {
-  'str_key': "I'm a dict variable!",
+  # hyphens in keys are converted to underscores
+  'str-key': "I'm a dict variable!",
   'list_key': [], # empty list variable
   'dict_key': {
     'key1': 123,

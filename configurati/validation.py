@@ -2,8 +2,7 @@
 Tools for validating a configuration spec
 """
 
-def identity(x):
-  return x
+from utils import identity
 
 
 class variable(object):
