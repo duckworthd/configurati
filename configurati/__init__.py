@@ -1,5 +1,5 @@
 from .commands import configure, import_config, load_config, load_spec, import_spec, env
-from .validation import required, optional, one_of
+from .validation import required, optional, one_of, ValidationError
 
 
 __all__ = [
@@ -12,4 +12,5 @@ __all__ = [
     'required',
     'env',
     'one_of',
+    'ValidationError',
 ]

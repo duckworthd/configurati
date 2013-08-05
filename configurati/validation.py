@@ -14,6 +14,11 @@ class variable(object):
   def __repr__(self):
     return str(self)
 
+  def __eq__(self, other):
+    return isinstance(other, variable) and \
+        other.type == self.type and \
+        other.help == self.help
+
 
 class optional(variable):
   """An optional variable
@@ -43,6 +48,11 @@ class optional(variable):
         (self.type, self.help, self.default)
     )
 
+  def __eq__(self, other):
+    return super(optional, self).__eq__(other) and \
+        isinstance(other, optional) and \
+        other.default == self.default
+
 
 class required(variable):
   """A required variable
@@ -65,6 +75,10 @@ class required(variable):
         "required(type=%s, help=%s)" %
         (self.type, self.help)
     )
+
+  def __eq__(self, other):
+    return super(required, self).__eq__(other) and \
+        isinstance(other, required)
 
 
 def is_required(obj):
