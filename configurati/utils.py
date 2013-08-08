@@ -12,7 +12,7 @@ def recursive_apply(obj, key_func=identity, value_func=identity):
     for k, v in obj.items():
       k = key_func(k)
       result[k] = recursive_apply(v, key_func, value_func)
-    return result
+    return value_func(result)
   elif isinstance(obj, list):
     result = []
     for v in obj:

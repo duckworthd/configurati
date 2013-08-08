@@ -13,6 +13,11 @@ from .validation import validate, is_spec, ValidationError
 from .utils import normalize_keys
 
 
+# global configuration object. When `configure` is called, the config is placed
+# here as well as returned.
+CONFIG = attrs()
+
+
 def load_config(path, relative_to_caller=False):
   """Load a config module as a dict
 
@@ -162,7 +167,10 @@ def configure(args=None, config_path=None, spec_path=None):
     spec   = load_spec(spec_path)
     config = validate(spec, config)
 
-  return attrs.from_dict(config)
+  # load config into global object
+  global CONFIG
+  CONFIG = attrs.from_dict(config)
+  return CONFIG
 
 
 def _eat_command_line_arguments(args=None):
