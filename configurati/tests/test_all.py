@@ -60,6 +60,23 @@ def test_basic_config():
   assert config.c == 3.14
 
 
+def test_global_config():
+  config_text = (
+    """
+    a = 1     # int
+    b = "2"   # str
+    c = 3.14  # float
+    """
+  )
+
+  write_and_load(config_text=config_text)
+  config = configurati.CONFIG()
+
+  assert config.a == 1
+  assert config.b == "2"
+  assert config.c == 3.14
+
+
 def test_collection_config():
   config_text = (
     """

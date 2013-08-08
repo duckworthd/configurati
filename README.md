@@ -48,12 +48,15 @@ dot and bracket notation,
 `application.py`
 
 ```python
+import configurati
 from configurati import configure
 
 config = configure(config_path='config.py')
 config.int_variable                     # 1234567890
 config.dict_variable.list_key[-1]       # 5
 config['dict_variable']['list_key'][-1] # 5
+
+config = configurati.CONFIG()           # same config as before
 ```
 
 Command Line Overrides

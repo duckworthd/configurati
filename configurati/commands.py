@@ -15,7 +15,11 @@ from .utils import normalize_keys
 
 # global configuration object. When `configure` is called, the config is placed
 # here as well as returned.
-CONFIG = attrs()
+_CONFIG = attrs()
+
+
+def CONFIG():
+  return _CONFIG
 
 
 def load_config(path, relative_to_caller=False):
@@ -168,9 +172,9 @@ def configure(args=None, config_path=None, spec_path=None):
     config = validate(spec, config)
 
   # load config into global object
-  global CONFIG
-  CONFIG = attrs.from_dict(config)
-  return CONFIG
+  global _CONFIG
+  _CONFIG = attrs.from_dict(config)
+  return CONFIG()
 
 
 def _eat_command_line_arguments(args=None):

@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name         = 'configurati',
-    version      = '0.1.1',
+    version      = '0.1.2',
     author       = 'Daniel Duckworth',
     author_email = 'pykalman@gmail.com',
     description  = 'Configuration files for Python',
