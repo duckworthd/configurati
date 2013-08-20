@@ -193,12 +193,19 @@ def _eat_command_line_arguments(args=None):
     assert args[i].startswith('--'), \
         'Command line options must be of the form "--key value'
     key = args[i][2:]
-    try:
-      value = eval(args[i+1])
-    except NameError:
+    if '=' in key:
+      key, value = key.split('=', 1)
+      i += 1
+    else:
       value = args[i+1]
+      i += 2
+    try:
+      value = eval(value)
+    except NameError:
+      pass
+    except SyntaxError:
+      pass
     result[key] = value
-    i += 2
   return normalize_keys(result)
 
 
