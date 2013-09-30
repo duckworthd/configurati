@@ -8,7 +8,10 @@ class attrs(dict):
   """A dict you can access with dot notation"""
 
   def __getattr__(self, key):
-    return self[key]
+    if key in self:
+      return self[key]
+    else:
+      raise AttributeError("No attribute: " + str(key))
 
   def __setattr__(self, key, value):
     self[key] = value

@@ -191,14 +191,16 @@ def _eat_command_line_arguments(args=None):
   i = 0
   while i < len(args):
     assert args[i].startswith('--'), \
-        'Command line options must be of the form "--key value'
+        'Command line options must be of the form "--key value"'
     key = args[i][2:]
     if '=' in key:
       key, value = key.split('=', 1)
       i += 1
-    else:
+    elif i+1 < len(args):
       value = args[i+1]
       i += 2
+    else:
+      raise Exception("No value for key: %s" % key)
     try:
       value = eval(value)
     except NameError:
