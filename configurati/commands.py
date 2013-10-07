@@ -1,25 +1,16 @@
 """
 Commands to load a configuration
 """
-import imp
-import json
+import codecs
 import os
-import re
 import sys
-import uuid
 
 from .attrs import attrs
-from .validation import validate, is_spec, ValidationError
+from .exceptions import ValidationError
+from .globals import CONFIG
+from .loaders import load
 from .utils import normalize_keys
-
-
-# global configuration object. When `configure` is called, the config is placed
-# here as well as returned.
-_CONFIG = attrs()
-
-
-def CONFIG():
-  return _CONFIG
+from .validation import validate, is_spec
 
 
 def load_config(path, relative_to_caller=False):
@@ -38,13 +29,8 @@ def load_config(path, relative_to_caller=False):
     previous_fname  = os.path.abspath(previous_fname)
     previous_folder = os.path.split(previous_fname)[0]
     path            = os.path.join(previous_folder, path)
-  modname = str(uuid.uuid4())
-  module = imp.load_source(modname, path)
-  variables = {
-      k:getattr(module, k) for k in dir(module)
-      if not '__' in k
-  }
-  return normalize_keys(variables)
+  with codecs.open(path, 'r', 'UTF-8') as f:
+    return attrs.from_dict(normalize_keys(load(f)))
 
 
 def load_spec(path, relative_to_caller=False):
@@ -87,128 +73,32 @@ def env(variable_name):
   return os.environ[variable_name]
 
 
-def update_config(old, new):
-  def _split(k):
-    # .a.b.c -> (a, b.c)
-    # .1.b.c -> (1, b.c)
-    # [1].b[2].c -> (1, .b[2].c)
-    # .a -> (a, '')
-    # [1] -> (1, '')
-    if len(k) == 0:
-      return []
-    elif k.startswith('['):
-      match = re.search(r'^\[([-+]?\d+?)\]', k)
-      start = int(match.group(1))
-      rest  = k[match.end():]
-      rest = _split(rest)
-      return [start] + rest
-    elif k.startswith('.'):
-      match = re.search(r'[.](.+?)(\[|[.]|$)', k)
-      start = match.group(1)
-      if match.end() == len(k):
-        rest = k[match.end():]
-      else:
-        rest = k[match.end()-1:]
-      rest = _split(rest)
-      try:
-        start = int(start)
-      except ValueError:
-        pass
-      return [start] + rest
-    else:
-      wtf
-
-  def _reconstruct(keys, v):
-    if len(keys) == 0:
-      return v
-    else:
-      start, rest = keys[0], keys[1:]
-      if isinstance(start, int):
-        raise ValueError("Unable to reconstruct command line argument with array indices")
-      else:
-        return {start: _reconstruct(rest, v)}
-
-  def _update(o, keys, v):
-    if len(keys) == 0:
-      return v
-    else:
-      if o is None:
-        return _reconstruct(keys, v)
-      else:
-        start, rest = keys[0], keys[1:]
-        if isinstance(start, int):
-          if isinstance(o, list):
-            o[start] = _update(o[start], rest, v)
-          elif isinstance(o, tuple):
-            o = list(o)
-            o[start] = _update(o[start], rest, v)
-            return tuple(o)
-        elif isinstance(start, basestring):
-          o[start] = _update(o.get(start, None), rest, v)
-        else:
-          wtf
-        return o
-
-  for (k, v) in new.items():
-    old = _update(old, _split('.' + k), v)
-  return old
-
-
-def configure(args=None, config_path=None, spec_path=None):
-  """Initialize configuration"""
-  # load configuration file, if one was specified
-  if config_path is not None:
-    config = load_config(config_path)
-  else:
-    config = {}
-
-  # override config file with command line args
-  args   = _eat_command_line_arguments(args)
-  config = update_config(config, args)
-
-  # validate the config
-  if spec_path:
-    spec   = load_spec(spec_path)
-    config = validate(spec, config)
-
-  # load config into global object
-  global _CONFIG
-  _CONFIG = attrs.from_dict(config)
-  return CONFIG()
-
-
-def _eat_command_line_arguments(args=None):
-  """Turn command line args into key-value pairs
-
-  Assume command line args are of the form
-    --key1 value1 --key2 value2 ...
-
-  values must be valid python expressions
-  """
-  result = {}
+def configure(args=None, config=None, spec=None):
+  # load command line arguments
   if args is None:
     args = sys.argv[1:]
-  i = 0
-  while i < len(args):
-    assert args[i].startswith('--'), \
-        'Command line options must be of the form "--key value"'
-    key = args[i][2:]
-    if '=' in key:
-      key, value = key.split('=', 1)
-      i += 1
-    elif i+1 < len(args):
-      value = args[i+1]
-      i += 2
-    else:
-      raise Exception("No value for key: %s" % key)
-    try:
-      value = eval(value)
-    except NameError:
-      pass
-    except SyntaxError:
-      pass
-    result[key] = value
-  return normalize_keys(result)
+  if args is not None:
+    args = load(args)
+  else:
+    args = {}
+
+  # load configuration file
+  if config is None and 'config' in args:
+    config = args['config']
+  if config is not None:
+    result = update(args, load_config(config))
+  else:
+    result = args
+
+  # apply config spec
+  if spec is None and 'spec' in args:
+    spec = args['spec']
+  if spec is not None:
+    result = validate(load_spec(spec), result)
+
+  # set globally and return
+  CONFIG(result)
+  return CONFIG()
 
 
 def _add_globals(**kwargs):

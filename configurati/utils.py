@@ -34,3 +34,44 @@ def normalize_keys(obj):
     return re.sub("([a-zA-Z])-([a-zA-Z])", r"\1_\2", k)
 
   return recursive_apply(obj, key_func=key_func)
+
+
+def update(o1, o2):
+  """Overlay `o1` over `o2`"""
+
+  def update_dict(o1, o2):
+    if not isinstance(o2, dict):
+      o2 = {}
+    for k, v in o1.items():
+      o2[k] = update(o1[k], o2.get(k, {}))
+    return o2
+
+  def update_list(o1, o2):
+    if not isinstance(o2, list):
+      o2 = []
+    if len(o1) > len(o2):
+      o2 = o2 + [Missing] * (len(o1) - len(o2))
+    for i in range(len(o1)):
+      o2[i] = update(o1[i], o2[i])
+    return o2
+
+
+  if isinstance(o1, dict):
+    return update_dict(o1, o2)
+  elif isinstance(o1, list):
+    return update_list(o1, o2)
+  elif isinstance(o1, tuple):
+    return tuple(update_list(o1, list(o2)))
+  else:
+    if isinstance(o1, Missing_):
+      return o2
+    else:
+      return o1
+
+
+class Missing_(object):
+  """Represents an unspecified value in a list or tuple"""
+  pass
+
+
+Missing = Missing_()

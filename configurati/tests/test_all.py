@@ -31,8 +31,8 @@ def write_and_load(args=[], config_text=None, spec_text=None):
   # run configuration
   config = configurati.configure(
       args,
-      config_path=config_path,
-      spec_path=spec_path
+      config=config_path,
+      spec=spec_path
   )
 
   # cleanup

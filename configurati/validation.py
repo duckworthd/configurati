@@ -98,16 +98,6 @@ def is_collection(obj):
       or isinstance(obj, tuple)
 
 
-class ValidationError(Exception):
-  def __init__(self, msg, path=''):
-    super(ValidationError, self).__init__("%s (%s)" % (msg, path[1:]))
-    self.msg  = msg
-    self.path = path
-
-  def extend_path(self, path):
-    return ValidationError(path=(path + self.path), msg=self.msg)
-
-
 def validate(spec, config):
   """Validate a configuration file against a spec"""
   if is_required(spec) and config is None:
