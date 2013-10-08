@@ -80,10 +80,17 @@ Missing = Missing_()
 
 def previous_frame():
   """Find the first frame in the call stack not originating from this module"""
+  module_name = __name__.split(".")
   for i in itertools.count():
-    name = sys._getframe(i).f_globals.get('__name__', '')
-    if name.split(".")[0] != __name__.split(".")[0]:
-      return sys._getframe(i)
+    frame = sys._getframe(i)
+    frame_name = frame.f_globals['__name__'].split(".")
+    if frame_name[0] != module_name[0]:
+      # first frame outside of this library
+      return frame
+    else:
+      # XXX configurati tests need this to work
+      if 'tests' in frame_name:
+        return frame
 
 
 def add_globals(**kwargs):
