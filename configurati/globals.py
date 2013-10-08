@@ -14,4 +14,4 @@ def CONFIG(config=None):
   if config is not None:
     global _CONFIG
     _CONFIG = attrs.from_dict(config)
-  return _CONFIG
+  return Config(_CONFIG)

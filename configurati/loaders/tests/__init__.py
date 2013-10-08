@@ -2,6 +2,7 @@ from StringIO import StringIO
 import os
 import unittest
 
+
 class LoadTests(object):
   """Test a load-from-file module"""
 

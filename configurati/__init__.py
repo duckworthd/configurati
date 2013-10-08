@@ -1,21 +1,34 @@
-from .attrs import attrs
-from .commands import CONFIG, configure, import_config, load_config, load_spec, import_spec, env
+from .attrs import *
+from .configure import *
+from .commands import *
 from .exceptions import *
-from .globals import CONFIG
-from .validation import required, optional, one_of
+from .globals import *
+from .validation import *
 
 
 __all__ = [
+    # attrs
     'attrs',
-    'configure',
+
+    # commands
+    'env',
     'import_config',
-    'load_config',
     'import_spec',
+    'load_config',
     'load_spec',
+
+    # configure
+    'configure',
+
+    # exceptions
+    'ConfiguratiException',
+    'ValidationError',
+
+    # globals
+    'CONFIG',
+
+    # validation
+    'one_of',
     'optional',
     'required',
-    'env',
-    'one_of',
-    'ValidationError',
-    'CONFIG',
 ]
