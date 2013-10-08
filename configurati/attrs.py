@@ -33,6 +33,13 @@ class attrs(dict):
     else:
       return set(self, '.' + key, value, build=True)
 
+  def __contains__(self, key):
+    try:
+      self[key]
+      return True
+    except:
+      return False
+
   def to_dict(self):
     f = lambda x: dict(x) if isinstance(x, attrs) else x
     return recursive_apply(self, value_func=f)

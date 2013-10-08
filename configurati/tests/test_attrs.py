@@ -55,6 +55,14 @@ class AttrsTests(unittest.TestCase):
     self.a['x.y.z'] = 1
     self.assertEqual(self.a['x'], attrs.from_dict({'y': {'z': 1}}))
 
+  def test_contains(self):
+    self.assertIn('a', self.a)
+    self.assertNotIn('c', self.a)
+
+  def test_contains_nested(self):
+    self.assertIn('b.c[2]', self.a)
+    self.assertNotIn('b.c[3]', self.a)
+    self.assertNotIn('b.e', self.a)
 
 class NextKeyTests(unittest.TestCase):
 
