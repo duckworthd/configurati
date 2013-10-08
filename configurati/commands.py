@@ -9,7 +9,7 @@ from .attrs import attrs
 from .exceptions import ValidationError
 from .globals import CONFIG
 from .loaders import load
-from .utils import normalize_keys
+from .utils import normalize_keys, previous_frame, add_globals
 from .validation import validate, is_spec
 
 
@@ -53,13 +53,13 @@ def import_config(path, relative_to_caller=True):
       from which this method is called.
   """
   variables = load_config(path, relative_to_caller=relative_to_caller)
-  _add_globals(**variables)
+  add_globals(**variables)
 
 
 def import_spec(path, relative_to_caller=True):
   """Import another specification's contents into the environment"""
   variables = load_spec(path, relative_to_caller=relative_to_caller)
-  _add_globals(**variables)
+  add_globals(**variables)
 
 
 def env(variable_name):
@@ -99,19 +99,3 @@ def configure(args=None, config=None, spec=None):
   # set globally and return
   CONFIG(result)
   return CONFIG()
-
-
-def _add_globals(**kwargs):
-  """Update global dictionary of whoever is using this module"""
-  # get first stack frame not in this module
-  # update environment of said frame
-  glob = previous_frame().f_globals
-  glob.update(kwargs)
-
-
-def previous_frame():
-  """Find the first frame in the call stack not originating from this module"""
-  i = 0
-  while sys._getframe(i).f_globals['__name__'] == __name__:
-    i += 1
-  return sys._getframe(i)

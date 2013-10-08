@@ -1,4 +1,6 @@
+import itertools
 import re
+import sys
 
 
 def identity(x):
@@ -75,3 +77,18 @@ class Missing_(object):
 
 
 Missing = Missing_()
+
+def previous_frame():
+  """Find the first frame in the call stack not originating from this module"""
+  for i in itertools.count():
+    name = sys._getframe(i).f_globals.get('__name__', '')
+    if name.split(".")[0] != __name__.split(".")[0]:
+      return sys._getframe(i)
+
+
+def add_globals(**kwargs):
+  """Update global dictionary of whoever is using this module"""
+  # get first stack frame not in this module
+  # update environment of said frame
+  glob = previous_frame().f_globals
+  glob.update(kwargs)
