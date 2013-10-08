@@ -6,11 +6,9 @@ import os
 import sys
 
 from .attrs import attrs
-from .exceptions import ValidationError
-from .globals import CONFIG
 from .loaders import load
 from .utils import normalize_keys, previous_frame, add_globals
-from .validation import validate, is_spec
+from .validation import is_spec
 
 
 def load_config(path, relative_to_caller=False):
@@ -38,7 +36,7 @@ def load_spec(path, relative_to_caller=False):
   spec = load_config(path, relative_to_caller=relative_to_caller)
   spec = { k:v for k,v in spec.items()
            if is_spec(v) }
-  return spec
+  return attrs.from_dict(spec)
 
 
 def import_config(path, relative_to_caller=True):
