@@ -188,9 +188,6 @@ class SetTests(unittest.TestCase):
     set(self.o, ".a.b[5]", 1)
     assert self.o['a']['b'][5] == 1
 
-  def test_short_tuple(self):
-    self.assertRaises(KeyError, set, self.o, ".a.c[4]", 1)
-
 
 class ValidKeyTests(unittest.TestCase):
 
