@@ -4,6 +4,7 @@ from .commands import *
 from .exceptions import *
 from .globals import *
 from .validation import *
+from .utils import *
 
 
 __all__ = [
@@ -31,4 +32,7 @@ __all__ = [
     'one_of',
     'optional',
     'required',
+
+    # utils
+    'Missing'
 ]

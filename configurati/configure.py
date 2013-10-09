@@ -3,6 +3,7 @@ The `configure` command
 """
 import sys
 
+from .loaders import load
 from .commands import load_config, load_spec
 from .globals import CONFIG
 from .utils import update

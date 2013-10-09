@@ -76,7 +76,12 @@ def update(o1, o2):
 
 class Missing_(object):
   """Represents an unspecified value in a list or tuple"""
-  pass
+
+  def __str__(self):
+    return "Missing"
+
+  def __repr__(self):
+    return str(self)
 
 
 Missing = Missing_()
