@@ -141,6 +141,9 @@ class GetTests(unittest.TestCase):
   def test_dot_and_bracket(self):
     assert get(self.o, ".a.b[1]") == 2
 
+  def test_negative_bracket(self):
+    self.assertEqual(get(self.o, ".a.b[-1]"), 3)
+
   def test_tuple(self):
     assert get(self.o, ".a.c[1]") == 8
 
