@@ -8,7 +8,7 @@ class UpdateTests(unittest.TestCase):
   def setUp(self):
     self.o2 = {
         'a': {
-          'b': [1,2,3],
+          'b': [1,Missing,3],
           'c': ('x', 'y', {'a': 'a'}),
         },
         'd': "zyx"
@@ -30,10 +30,15 @@ class UpdateTests(unittest.TestCase):
 
   def test_short_list(self):
     o = update({'a': {'b': [8,Missing,Missing,5]}}, self.o2)
-    assert o['a']['b'][0] == 8  # over-written
-    assert o['a']['b'][1] == 2  # Missing, so not overwritten
-    assert o['a']['b'][3] == 5  # list was extended
+    assert o['a']['b'][0] == 8        # over-written
+    assert o['a']['b'][1] is Missing  # Missing in both
+    assert o['a']['b'][2] == 3        # Missing in o2, not o1
+    assert o['a']['b'][3] == 5        # list was extended
 
   def test_new_keys(self):
     o = update({'a': {'z': 'zyx'}}, self.o2)
     assert o['a']['z'] == 'zyx'
+
+  def test_missing_in_original(self):
+    o = update({'a': {'b': [Missing, 2]}}, self.o2)
+    self.assertEqual(o['a']['b'], [1,2,3])

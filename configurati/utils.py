@@ -57,13 +57,16 @@ def update(o1, o2):
       o2[i] = update(o1[i], o2[i])
     return o2
 
+  def update_tuple(o1, o2):
+    return tuple(update_list(o1, list(o2)))
+
 
   if isinstance(o1, dict):
     return update_dict(o1, o2)
   elif isinstance(o1, list):
     return update_list(o1, o2)
   elif isinstance(o1, tuple):
-    return tuple(update_list(o1, list(o2)))
+    return update_tuple(o1, o2)
   else:
     if isinstance(o1, Missing_):
       return o2
