@@ -2,7 +2,8 @@
 Tools for validating a configuration spec
 """
 
-from utils import identity
+from .exceptions import ValidationError
+from .utils import identity, Missing
 
 
 class variable(object):
@@ -26,6 +27,7 @@ class optional(variable):
   left unspecified in a config file.
 
   >>> version = optional(default="1.0-SNAPSHOT", \
+                         type=str, \
                          help="Version of this application")
 
   Parameters
@@ -59,6 +61,9 @@ class required(variable):
   Used in a spec file to denote a variable that must be in a valid config file.
   If a required variable is not in a config file, validation will fail.
 
+  >>> version = required(type=str, \
+                         help="Version of this application")
+
   Parameters
   ----------
   type : function
@@ -80,96 +85,6 @@ class required(variable):
         isinstance(other, required)
 
 
-def is_required(obj):
-  """Is this a required variable?"""
-  return is_collection(obj) \
-      or isinstance(obj, required)
-
-
-def is_spec(obj):
-  """Is this a valid specification variable?"""
-  return is_collection(obj) \
-      or isinstance(obj, variable)
-
-
-def is_collection(obj):
-  return isinstance(obj, dict) \
-      or isinstance(obj, list) \
-      or isinstance(obj, tuple)
-
-
-def validate(spec, config):
-  """Validate a configuration file against a spec"""
-  if is_required(spec) and config is None:
-    raise ValidationError("Missing required argument")
-
-  # unpack optional collection
-  if isinstance(spec, variable) and is_collection(spec.type):
-    if isinstance(spec, optional):
-      if config is None:
-        return spec.default
-      else:
-        spec = spec.type
-    elif isinstance(spec, required):
-      spec = spec.type
-    else:
-      raise ValidationError(msg="Unrecognized variable type: %s" % str(type(spec)))
-
-  if isinstance(spec, dict):
-    if not isinstance(config, dict):
-      raise ValidationError("Improper object type (expected dict)")
-    result = {}
-    for k, v in spec.items():
-      try:
-        result[k] = validate(v, config.get(k, None))
-      except ValidationError as e:
-        raise e.extend_path(".%s" % k)
-    return result
-
-  if isinstance(spec, list):
-    if not isinstance(config, list):
-      raise ValidationError("Improper object type (expected list)")
-    result = []
-    for i, v in enumerate(config):
-      try:
-        result.append(validate(spec[0], v))
-      except ValidationError as e:
-        raise e.extend_path("[%d]" % i)
-    return result
-
-  if isinstance(spec, tuple):
-    if not isinstance(config, tuple):
-      raise ValidationError("Improper object type (expected tuple)")
-    if not len(spec) == len(config):
-      raise ValidationError("Incorrect tuple length (expected %d; found %d)" % \
-          (len(spec), len(config)))
-    result = []
-    for i, (s, v) in enumerate(zip(spec,config)):
-      try:
-        result.append(validate(s, v))
-      except ValidationError as e:
-        raise e.extend_path("[%d]" % i)
-    return tuple(result)
-
-  if isinstance(spec, required):
-    if config is None:
-      raise ValidationError("Missing required argument")
-    else:
-      try:
-        return spec.type(config)
-      except ValueError as e:
-        raise ValidationError("Type conversion failure")
-
-  if isinstance(spec, optional):
-    if config is None:
-      return spec.default
-    else:
-      try:
-        return spec.type(config)
-      except ValueError as e:
-        raise ValidationError("Type conversion failure")
-
-
 def one_of(**options):
   """is this object one of these options?"""
   def type(obj):
@@ -177,3 +92,97 @@ def one_of(**options):
       raise ValueError("%s isn't one of %s" % (obj, options))
     return obj
   return type
+
+
+def is_spec(obj):
+  """Is this a valid specification for an object?"""
+  return any(test(obj) for test, _ in VALIDATORS)
+
+
+def validate_required(spec, config):
+  if config is Missing:
+    raise ValidationError("Missing required argument")
+  if hasattr(spec.type, '__call__'):
+    try:
+      return spec.type(config)
+    except ValueError:
+      raise ValidationError('failed to convert "{}" with "{}"'.format(config, spec))
+  else:
+    # a spec, rather than a function, was used as the type.
+    return validate(spec.type, config)
+
+
+def validate_optional(spec, config):
+  if config is Missing:
+    config = spec.default
+  return validate(required(type=spec.type), config)
+
+
+def validate_dict(spec, config):
+  if config is Missing:
+    # if config is missing, replace it with an empty dict. if any of the spec's
+    # contents are required, this will throw a ValidationError later; on the
+    # other hand, if they're all optional, they'll be replaced sensibly.
+    config = {}
+
+  if not isinstance(config, dict):
+    raise ValidationError('spec calls for type dict; found "{}" instead'.format(config))
+
+  # for each key-value pair, replace with validated bit or what's already in
+  # the config IF the value is in fact a spec definition
+  result = {}
+  for k, v in spec.items():
+    if is_spec(v):
+      result[k] = validate(v, config.get(k, Missing))
+  return result
+
+
+def validate_list(spec, config):
+  if len(spec) > 1:
+    raise ValidationError('spec for list "{}" contains multiple definitions for its contents')
+  elif len(spec) == 0:
+    # no spec for contents, so just take it as everything is OK
+    spec = [required(type=identity)]
+
+  if config is Missing:
+    # lists are always optional; if unspecified, an empty list is used
+    config = []
+
+  if not isinstance(config, list):
+    raise ValidationError('spec calls for type list; found "{}" instead'.format(config))
+
+  return [validate(spec[0], c) for c in config]
+
+
+def validate_tuple(spec, config):
+  if config is Missing:
+    # if config is missing, replace it a tuple of all missing values. if all of
+    # this spec's fields are optional, then they'll be replaced reasonable;
+    # otherwise, a ValidationError will be thrown, as expected.
+    config = tuple([Missing] * len(spec))
+
+  if not isinstance(config, tuple):
+    raise ValidationError('spec calls for type tuple; found "{}" instead'.format(config))
+
+  # XXX what if spec and config have different lengths?
+  if len(spec) != len(config):
+    raise ValidationError('length of spec "{}" doesn\'t match config "{}"'.format(spec, config))
+
+  return tuple( validate(s, c) for s, c in zip(spec, config) )
+
+
+VALIDATORS = [
+    (lambda x: isinstance(x,required),validate_required),
+    (lambda x: isinstance(x,optional),validate_optional),
+    (lambda x: isinstance(x,    dict),    validate_dict),
+    (lambda x: isinstance(x,    list),    validate_list),
+    (lambda x: isinstance(x,   tuple),   validate_tuple),
+  ]
+
+
+def validate(spec, config):
+  for (test, func) in VALIDATORS:
+    if test(spec):
+      return func(spec, config)
+  raise ValidationError('No validator for spec: "{}"'.format(spec))
+
