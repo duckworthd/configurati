@@ -5,9 +5,9 @@ import re
 def substitute(s):
   """Contents of `...` evaluated in Python"""
   if isinstance(s, basestring) and s.count("`") == 2:
-    match = re.search("""`([^`]+)`""", s)
+    match = re.search("""^`([^`]+)`$""", s)
     contents, rest = match.group(1), s[match.end():]
-    return str(evaluate(contents)) + rest
+    return evaluate(contents)
   else:
     return s
 
