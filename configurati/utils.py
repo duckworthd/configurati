@@ -50,9 +50,14 @@ def update(o1, o2):
 
   def update_list(o1, o2):
     if not isinstance(o2, list):
-      o2 = []
+      try:
+        o2 = list(o2)
+      except ValueError:
+        o2 = []
     if len(o1) > len(o2):
       o2 = o2 + [Missing] * (len(o1) - len(o2))
+    if len(o2) > len(o1):
+      o1 = o1 + [Missing] * (len(o2) - len(o1))
     for i in range(len(o1)):
       o2[i] = update(o1[i], o2[i])
     return o2

@@ -162,7 +162,13 @@ def validate_tuple(spec, config):
     config = tuple([Missing] * len(spec))
 
   if not isinstance(config, tuple):
-    raise ValidationError('spec calls for type tuple; found "{}" instead'.format(config))
+    if hasattr(config, '__iter__'):
+      # coerce into a tuple. when using command line arguments
+      # like '--a[1]', it's impossible to tell if a should be
+      # a list or a tuple. this gives validation some leniency.
+      config = tuple(config)
+    else:
+      raise ValidationError('spec calls for type tuple; found "{}" instead'.format(config))
 
   # XXX what if spec and config have different lengths?
   if len(spec) != len(config):
@@ -178,7 +184,6 @@ VALIDATORS = [
     (lambda x: isinstance(x,    list),    validate_list),
     (lambda x: isinstance(x,   tuple),   validate_tuple),
   ]
-
 
 def validate(spec, config):
   for (test, func) in VALIDATORS:

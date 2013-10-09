@@ -47,6 +47,7 @@ sns = [
   ]
 """
     self.a = [
+        "--version[0]", "1",
         "--sns[1].enabled", "true",
         "--node.host", "127.0.0.1"
       ]
@@ -69,6 +70,7 @@ sns = [
   def test_args(self):
     c = configure(self.a)
     c_ = {
+        'version': [1],
         'node': {
           'host': '127.0.0.1',
         },
@@ -83,7 +85,7 @@ sns = [
     with write(self.o) as (f_config, f_spec):
       c = configure(["--config", f_config.name] + self.a)
       c_ = {
-          'version': (Missing, "RELEASE"),
+          'version': [1, "RELEASE"],
           'node': {'host': '127.0.0.1'},
           'sns': [
             {'topic': "one", "enabled": True},
@@ -114,7 +116,7 @@ sns = [
     with write(self.o, self.s) as (f_config, f_spec):
       c = configure(self.a + ["--config", f_config.name, "--spec", f_spec.name])
       c_ = {
-          'version': (0, "RELEASE"),
+          'version': (1, "RELEASE"),
           'node': {'host': '127.0.0.1', 'port': 8888},
           'sns': [
             {'topic': "one", "enabled": True},
