@@ -120,6 +120,10 @@ def set(obj, key, value, build=False):
       return obj
 
     def set_tuple(obj, key, value):
+      if isinstance(key, int) and key >= len(obj):
+        raise KeyError(
+            "index {} is too large for tuple {}".format(key, obj)
+          )
       return tuple(set_list(list(obj), key, value))
 
     # parse next atomic key
