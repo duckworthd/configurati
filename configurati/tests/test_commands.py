@@ -82,5 +82,3 @@ def save(text, loadfunc=load_config):
     f.write(text)
     f.flush()
     yield loadfunc(f.name)
-
-

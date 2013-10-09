@@ -14,7 +14,9 @@ def substitute(s):
 
 def evaluate(line):
   """Evaluate a line and return its final output"""
-  line = line.split(";")
+  # XXX this isn't smart enough to know about semicolons/newlines in strings,
+  # or code where the final result relies on indentation
+  line = re.split(";|\n", line)
   line[-1] = "OUTPUT = " + line[-1]
   line = ";".join(line)
 
