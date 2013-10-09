@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+import json
 from tempfile import NamedTemporaryFile as NTF
 import unittest
 
@@ -125,10 +126,24 @@ sns = [
         }
       self.assertEqual(c, c_)
 
+  def test_json_config(self):
+    c_ = {
+        'a': 1,
+        'b': {
+          'ba': 2,
+          'bb': "three"
+        }
+      }
+    o = json.dumps(c_)
+    with write(o, configext='.yaml') as (f_config, f_spec):
+      c = configure(["--config", f_config.name])
+      c_['config'] = f_config.name
+      self.assertEqual(c, c_)
+
 
 @contextmanager
-def write(config="", spec=""):
-  with NTF(suffix=".py") as f_config:
+def write(config="", spec="", configext='.py'):
+  with NTF(suffix=configext) as f_config:
     with NTF(suffix=".py") as f_spec:
       f_config.write(config)
       f_config.flush()

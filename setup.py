@@ -2,13 +2,13 @@ from setuptools import setup, find_packages
 
 setup(
     name         = 'configurati',
-    version      = '0.2.0-SNAPSHOT',
+    version      = '0.2.0',
     author       = 'Daniel Duckworth',
-    author_email = 'pykalman@gmail.com',
+    author_email = 'duckworthd@gmail.com',
     description  = 'Configuration files for Python',
     license      = 'BSD',
     keywords     = 'config configuration',
-    url          = 'github.com/duckworthd/configurati',
+    url          = 'http://github.com/duckworthd/configurati',
     packages     = find_packages(),
     classifiers  = [
       'Development Status :: 4 - Beta',
