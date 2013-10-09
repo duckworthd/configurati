@@ -1,6 +1,7 @@
 import unittest
 
 from configurati.loaders.commandline import *
+from configurati.utils import Missing
 
 
 class NextTests(unittest.TestCase):
@@ -28,4 +29,4 @@ class LoadTests(unittest.TestCase):
 
   def test_nested_object2(self):
     # XXX shouldn't this be {"a": {"b": [Missing, 1]}} ?
-    assert load(["--a.b[1]", "1"]) == {"a": {"b": {1: 1}}}
+    assert load(["--a.b[1]", "1"]) == {"a": {"b": [Missing, 1]}}

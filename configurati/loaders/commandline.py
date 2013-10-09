@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import json
 
-from ..config import set
+from ..attrs import set
 from ..exceptions import ConfiguratiException
 
 
@@ -11,7 +11,6 @@ def load(args):
   result = {}
   if args is None:
     args = sys.argv[1:]
-  i = 0
   while len(args) > 0:
     k, v, args = next(args)
     set(result, "." + k, v, build=True)
