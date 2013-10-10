@@ -172,7 +172,7 @@ collection_config = {
 date = datetime.datetime.now()
 
 # valid config names have to start start with a letter and can only contain
-letters, numbers, and underscores. This variable will be ignored.
+# letters, numbers, and underscores. This variable will be ignored.
 _ignored = True
 ```
 
@@ -363,7 +363,7 @@ $ python application.py '--database.password' 'PASSWORD'
             {'backend': 'memcached', 'host': 'localhost'}],
  'database': {'host': 'localhost',
               'password': 'PASSWORD',
-              'port': 9000,
+              'port': 8888,
               'username': 'duckworthd'},
  'description': '',
  'name': 'sample',
