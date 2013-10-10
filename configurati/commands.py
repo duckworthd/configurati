@@ -7,7 +7,7 @@ import sys
 
 from .attrs import attrs
 from .loaders import load
-from .utils import normalize_keys, previous_frame, add_globals
+from .utils import normalize_keys, previous_frame, add_globals, strip_invalid_keys
 from .validation import is_spec
 
 
@@ -28,7 +28,7 @@ def load_config(path, relative_to_caller=False):
     previous_folder = os.path.split(previous_fname)[0]
     path            = os.path.join(previous_folder, path)
   with codecs.open(path, 'r', 'UTF-8') as f:
-    return attrs.from_dict(normalize_keys(load(f)))
+    return attrs.from_dict(strip_invalid_keys(normalize_keys(load(f))))
 
 
 def load_spec(path, relative_to_caller=False):

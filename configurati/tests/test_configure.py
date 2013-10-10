@@ -37,6 +37,9 @@ sns = [
     'enabled': optional(type=bool, default=False)
   }
 ]
+
+# valid identifiers can't start with an underscore
+_ignored = required(type=str)
 """
     self.o = """
 from configurati import *

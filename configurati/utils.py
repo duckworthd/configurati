@@ -38,6 +38,24 @@ def normalize_keys(obj):
   return recursive_apply(obj, key_func=key_func)
 
 
+def strip_invalid_keys(obj):
+  # only keys of this format are valid
+  valid_identifier = re.compile("""^[a-zA-Z][a-zA-Z0-9_-]*$""")
+
+  if isinstance(obj, dict):
+    result = {}
+    for k, v in obj.items():
+      if valid_identifier.search(k) is not None:
+        result[k] = strip_invalid_keys(v)
+    return result
+  elif isinstance(obj, list):
+    return [ strip_invalid_keys(v) for v in obj ]
+  elif isinstance(obj, tuple):
+    return tuple( strip_invalid_keys(v) for v in obj  )
+  else:
+    return obj
+
+
 def update(o1, o2):
   """Overlay `o1` over `o2`"""
 

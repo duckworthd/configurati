@@ -42,3 +42,25 @@ class UpdateTests(unittest.TestCase):
   def test_missing_in_original(self):
     o = update({'a': {'b': [Missing, 2]}}, self.o2)
     self.assertEqual(o['a']['b'], [1,2,3])
+
+
+class StripInvalidKeysTests(unittest.TestCase):
+
+  def test_strip(self):
+    d = {
+        '_a': {
+          'b': 1,
+        },
+        'd-e-f': {
+          'g': (1, 2, 3),
+          'c': [{'_ignore': "a", 'keep': "b"}]
+        }
+      }
+    r = {
+        'd-e-f': {
+          'g': (1, 2, 3),
+          'c': [{'keep': "b"}]
+        }
+      }
+
+    self.assertEqual(strip_invalid_keys(d), r)
