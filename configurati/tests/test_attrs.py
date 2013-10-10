@@ -223,3 +223,24 @@ class ValidKeyTests(unittest.TestCase):
 
   def test_non_integer_in_bracket(self):
     self.assertFalse(valid_key(".a[ha]"))
+
+
+class UnrollTests(unittest.TestCase):
+
+  def test_simple(self):
+    d = {'a': 1}
+    a = unroll(d)
+    r = {'.a': 1}
+    self.assertEqual(a, r)
+
+  def test_nested(self):
+    d = {'a': {'b': 1}}
+    a = unroll(d)
+    r = {'.a.b': 1}
+    self.assertEqual(a, r)
+
+  def test_nested_list(self):
+    d = {'a': {'b': [1, 2], 'c': (4, 5)}}
+    a = unroll(d)
+    r = {'.a.b[0]': 1, '.a.b[1]': 2, '.a.c[0]': 4, '.a.c[1]': 5}
+    self.assertEqual(a, r)

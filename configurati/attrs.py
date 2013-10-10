@@ -77,11 +77,32 @@ class attrs(adict):
     f = lambda x: attrs(x) if isinstance(x, dict) else x
     return recursive_apply(d, value_func=f)
 
+  def unroll(self):
+    unrolled = unroll(self)
+    return { k[1:]:v for k, v in unrolled.items() }
+
 
 def is_atomic(key):
   """return True is a key is "simple" in the sense of not referring to a nested
   object. e.g., 'a' is simple but 'a.b' is not"""
   return not ('[' in key or '.' in key)
+
+
+def unroll(a):
+  if isinstance(a, dict):
+    result = {}
+    for k, v in a.items():
+      for k_, v_ in unroll(v).items():
+        result["." + k + k_] = v_
+    return result
+  elif isinstance(a, tuple) or isinstance(a, list):
+    result = {}
+    for k, v, in enumerate(a):
+      for k_, v_ in unroll(v).items():
+        result["[{}]{}".format(k, k_)] = v_
+    return result
+  else:
+    return {'': a}
 
 
 def get(obj, key):
