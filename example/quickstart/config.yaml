@@ -1,0 +1,10 @@
+cats:
+- name: "Mittens"
+  age: 18
+- name: "Bob"
+  age: 5
+
+owner:
+  name: "Config Uratii"
+  address: "1234 Python Dr."
+  birthay: "`from datetime import datetime; datetime(1970, 1, 1).isoformat()`"
