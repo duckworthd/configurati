@@ -1,15 +1,12 @@
-`configurati`
-============
+# `configurati`
 
 `configurati` is a configuration file library for python,
 
-+ config files are just normal Python modules
-+ command-line overrides of configuration file variables
-+ configuration file verification, including optional variables, type coercion,
-  and collections
++ configuration files json, yaml, or python modules
++ command-line overrides of configuration file
++ configuration including optional variables, type coercion, and collections
 
-Installation
-------------
+# Installation
 
 `configurati` can be install from [PyPi](https://pypi.python.org/pypi/configurati/0.1) via `pip` or `easy_install`
 
@@ -18,176 +15,117 @@ $ easy_install configurati
 $ pip install configurati
 ```
 
-Config Format
--------------
+# Quick Start
 
-Configuration files are just normal Python modules. All variables in the
-configuration file's namespace will be loaded.
+Let's say I want to configure my awesome app with details about my cats. I could write a config file like follows,
 
 `config.py`
 
-```python
-from configurati import env
+```Python
+from datetime import datetime
 
-int_variable          = 1234567890
-function_variable     = lambda: "Hello, World!"
-environment_variable  = env("USER")   # use a bash environment variable
-dict_variable = {
-  'str_key'  : "I'm a dict variable!",
-  'list_key' : [1,2,3,4,5],
-  'dict_key' : {
-    'key1' : 123,
-    'key2'  : (0, 1, 'SNAPSHOT'),
-  }
+cats = [
+  {'name' : 'Mittens', 'age' : 18},
+  {'name' :     'Bob', 'age' :  4}
+]
+
+owner = {
+  'name'     : 'Config Uratii',
+  'address'  : "1234 Python Dr.",
+  'birthday' : datetime(1970, 1, 1).isoformat()
 }
 ```
 
-Configuration files are loaded with `configurati.configure` and access with
-dot and bracket notation,
+To use this configuration, all I need to do is call `configurati.configure` in
+my code...
 
 `application.py`
 
-```python
-import configurati
+```Python
+from pprint import pprint
 from configurati import configure
 
-config = configure(config_path='config.py')
-config.int_variable                     # 1234567890
-config.dict_variable.list_key[-1]       # 5
-config['dict_variable']['list_key'][-1] # 5
-
-config = configurati.CONFIG()           # same config as before
+if __name__ == '__main__':
+  pprint(configure())
 ```
 
-Command Line Overrides
-----------------------
-
-You can override parts of configuration files directly from the command line,
-even in nested collections, with any valid python expression,
-
-`config.py`
-
-```python
-int_variable      = 1234567890
-function_variable = lambda: "Hello, World!"
-list_variable = [
-  { 'key': 'value1' },
-  { 'key': 'value2' },
-]
-```
-
-`application.py`
-
-```python
-from configurati import configure
-
-config = configure(config_path='config.py')
-config.int_variable       # 0
-config.list_variable[1]   # {'key': 'new value'}
-```
-
-`command line`
+...and tell it which configuration file to use from the command line,
 
 ```bash
-$ python application.py '--int_variable' '0' '--list_variable[1].key' '"new value"'
+$ python application.py \
+  --config config.py
 ```
 
-Merging configs
----------------
+But that's not quite right. I misspelled my name, and today is Bob's birthday!
 
-Combine multiple configuration files by importing their entire contents into
-the calling configuration file,
-
-`config.py`
-
-```python
-from configurati import import_config
-
-import_config('other_config.py')
+```bash
+$ python application.py         \
+  --config config.py            \
+  "--owner.name" "Config Urati" \
+  "--cats[1].age" "5"
 ```
 
-or by importing other configuration files as `dict`s,
+Oh, and I forgot about my dogs!
 
-`config.py`
-
-```python
-from configurati import load_config
-
-other_config = load_config('other_config.py')
+```bash
+$ python application.py         \
+  --config config.py            \
+  "--owner.name" "Config Urati" \
+  "--cats[1].age" "5"           \
+  "--dogs[0]" '{"name": "Sir Barks-a-lot", "age": 15}'
 ```
 
-Validation
-----------
+Actually, I don't like defining configuration files in Python. Let me do it in
+a more language-agnostic format,
 
-Defining a configuration format specification allows one several benefits,
+`config.yaml`
 
-+ type coercion
-+ default values for optional variables
-+ removing un-specified variables from configuration file (e.g. imports,
-  temporary variables, etc)
+```yaml
+cats:
+- name: "Mittens"
+  age: 18
+- name: "Bob"
+  age: 4
 
-`spec.py`
-
-```python
-from configurati import optional, required, load_spec, import_spec
-
-# required variables
-int_variable = required(type=int, help="An integer variable")
-untyped_variable = required(help="This variable won't be coerced")
-
-# optional variables with default values
-optional_float_variable = optional(type=float, default=1.0, \
-                          help="A floating point variable")
-
-# if not explicitly made optional, collections are required
-dict_variable = {
-    'str_key': required(type=str),
-
-    # lists contains 0 or more objects of the same type. This list_key is optional.
-    'list_key': optional(type=[required(type=int)], default=[]),
-
-    'dict_key': {
-      # tuples contains a fixed number of variables, each with its own
-      # specfiication
-      'inner_dict_key': (required(type=int), required(type=str)),
-    }
-}
-
-### import another specification file's contents
-# import_spec('spec2.py')
-# spec2 = load_spec('spec2.py')
+owner:
+  name: "Config Uratii"
+  address: "1234 Python Dr."
+  "birthay": "`from datetime import datetime; datetime(1970, 1, 1).isoformat()`"
 ```
 
-`config.py`
+When I load this file with configurati, all text in backticks will be
+evaluated, but what if I want to use it in another language? I need to see the
+real output!
 
-```python
-# int_variable will be coerced to an int
-int_variable = '123'
-untyped_variable = 'abc'
-
-### default value will be used
-# optional_float_variable = 2.0
-
-dict_variable = {
-  'str_key': 'string',
-
-  ### default value will be used
-  # 'list_key': [1,2,3]
-
-  'dict_key': {
-    'str_key': 'string2',
-    'inner_dict_key': (1, 'hello')
-  }
-}
+```bash
+$ python -m configurati.interpolate config.yaml > clean_config.yaml
 ```
+
+Finally! Configuration complete. Now Let's actually use it!
 
 `application.py`
 
-```
+```Python
 from configurati import configure
 
-config = configure(config_path='config.py', spec_path='spec.py')
-config.int_variable            # 123
-config.optional_float_variable # 1.0
-config.dict_variable.list_key  # []
+if __name__ == '__main__':
+  c = configure()
+
+  # using bracket notation
+  c['cats'][0]['age']   # 18
+
+  # ...dot notation
+  c.dogs[0].name        # "Sir Barks-a-lot"
+
+  # ...fancy bracket notation
+  c['cats[0].age']      # guess what...18
 ```
+
+...and that's `configurati`!
+
+
+# Configuration Files
+
+# Configuration Specifications
+
+# `configurati.attrs`
