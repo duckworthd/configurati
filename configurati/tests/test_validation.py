@@ -1,6 +1,7 @@
 import unittest
 
 from configurati.validation import *
+from configurati.validation import _validate
 
 
 class ValidateRequiredTests(unittest.TestCase):
@@ -170,9 +171,14 @@ class ValidateListTests(unittest.TestCase):
 
 class ValidateTupleTests(unittest.TestCase):
 
-  def test_bad_length(self):
+  def test_too_long(self):
     s = (required(), required())
     self.assertRaises(ValidationError, validate_tuple, s, (1, 2, 3))
+
+  def test_too_short(self):
+    s = (required(), optional(default=2))
+    self.assertEquals(validate_tuple(s, (1,)), (1, 2))
+
 
   def test_optional_children(self):
     s = (optional(type=int, default=1), optional(type=int, default=2))
@@ -227,7 +233,7 @@ class ValidateTests(unittest.TestCase):
         'node': { 'host': 'localhost', 'port': 8888 },
         'sns': []
       }
-    self.assertEqual(validate(self.s, o), r)
+    self.assertEqual(_validate(self.s, o), r)
 
   def test_invalid_list_entry(self):
     o = {
@@ -238,22 +244,21 @@ class ValidateTests(unittest.TestCase):
         ]
       }
 
-    self.assertRaises(ValidationError, validate, self.s, o)
+    self.assertRaises(ValidationError, _validate, self.s, o)
 
   def test_missing_in_tuple(self):
     o = {
         'version': (Missing, 'RELEASE')
       }
-    self.assertEqual(validate(self.s, o)['version'], (0, "RELEASE"))
+    self.assertEqual(_validate(self.s, o)['version'], (0, "RELEASE"))
 
   def test_nonspec_in_spec(self):
-    r = validate(self.s, {})
+    r = _validate(self.s, {})
     self.assertNotIn('os', r)
 
   def test_extra_config(self):
-    r = validate(self.s, {'unimportant': True})
+    r = _validate(self.s, {'unimportant': True})
     self.assertNotIn('unimportant', r)
 
   def test_no_validator(self):
-    self.assertRaises(ValidationError, validate, 1, Missing)
-
+    self.assertRaises(ValidationError, _validate, 1, Missing)

@@ -2,6 +2,7 @@
 Tools for validating a configuration spec
 """
 
+from .attrs import attrs
 from .exceptions import ValidationError
 from .utils import identity, Missing
 
@@ -109,13 +110,13 @@ def validate_required(spec, config):
       raise ValidationError('failed to convert "{}" with "{}"'.format(config, spec))
   else:
     # a spec, rather than a function, was used as the type.
-    return validate(spec.type, config)
+    return _validate(spec.type, config)
 
 
 def validate_optional(spec, config):
   if config is Missing:
     config = spec.default
-  return validate(required(type=spec.type), config)
+  return _validate(required(type=spec.type), config)
 
 
 def validate_dict(spec, config):
@@ -133,7 +134,7 @@ def validate_dict(spec, config):
   result = {}
   for k, v in spec.items():
     if is_spec(v):
-      result[k] = validate(v, config.get(k, Missing))
+      result[k] = _validate(v, config.get(k, Missing))
   return result
 
 
@@ -151,7 +152,7 @@ def validate_list(spec, config):
   if not isinstance(config, list):
     raise ValidationError('spec calls for type list; found "{}" instead'.format(config))
 
-  return [validate(spec[0], c) for c in config]
+  return [_validate(spec[0], c) for c in config]
 
 
 def validate_tuple(spec, config):
@@ -170,11 +171,15 @@ def validate_tuple(spec, config):
     else:
       raise ValidationError('spec calls for type tuple; found "{}" instead'.format(config))
 
+  # extend config with Missing's if necessary
+  if len(config) < len(spec):
+    config = tuple(list(config) + [Missing] * (len(spec) - len(config)))
+
   # XXX what if spec and config have different lengths?
   if len(spec) != len(config):
     raise ValidationError('length of spec "{}" doesn\'t match config "{}"'.format(spec, config))
 
-  return tuple( validate(s, c) for s, c in zip(spec, config) )
+  return tuple( _validate(s, c) for s, c in zip(spec, config) )
 
 
 VALIDATORS = [
@@ -185,9 +190,25 @@ VALIDATORS = [
     (lambda x: isinstance(x,   tuple),   validate_tuple),
   ]
 
-def validate(spec, config):
+def _validate(spec, config):
   for (test, func) in VALIDATORS:
     if test(spec):
       return func(spec, config)
   raise ValidationError('No validator for spec: "{}"'.format(spec))
 
+
+def missing_required_keys(spec, config):
+  result = []
+  for k, v in spec.unroll().items():
+    if isinstance(v, required) and k not in config:
+      result.append(k)
+  return result
+
+
+def validate(spec, config):
+  missing = missing_required_keys(spec, attrs.from_dict(config))
+  if len(missing) > 0:
+    text = "Missing required fields: " + ", ".join(missing)
+    raise ValidationError("".join(text))
+
+  return _validate(spec, config)
