@@ -1,31 +1,33 @@
-import os
+import argparse
+from StringIO import StringIO
 import sys
 
 import json
 import yaml
 
-from .configure import configure
-from .exceptions import ConfiguratiException
-
-
-def die(message=None):
-  if message:
-    sys.stderr.write(message)
-  sys.stderr.write("Usage: python -m configurati.interpolate <config file>\n")
-  sys.exit(1)
+from .loaders import load
 
 
 if __name__ == '__main__':
-  if len(sys.argv) != 2:
-    die()
-  fname = sys.argv[1]
-  ext = os.path.splitext(fname)[1].lower()
+  parser = argparse.ArgumentParser(
+      "evaluate configurati config file"
+    )
+  parser.add_argument("format", choices=["yaml", "json"],
+      help="Format of config file")
+  args = parser.parse_args()
 
-  config = configure(args=[], config=sys.argv[1])
+  # write data to file-like object
+  s = StringIO()
+  s.write(sys.stdin.read())
+  s.seek(0)
+  s.name = "config." + args.format
 
-  if ext == '.yaml':
+  # load and evaluate config
+  config = load(s)
+
+  # write it back out
+
+  if args.format == 'yaml':
     print yaml.dump(config)
-  elif ext == '.json':
+  elif args.format == 'json':
     print json.dumps(config)
-  else:
-    die("Unknown file format: {}".format(ext))
