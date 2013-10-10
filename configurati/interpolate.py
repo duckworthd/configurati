@@ -1,6 +1,7 @@
 import argparse
 from StringIO import StringIO
 import sys
+import uuid
 
 import json
 import yaml
@@ -20,7 +21,7 @@ if __name__ == '__main__':
   s = StringIO()
   s.write(sys.stdin.read())
   s.seek(0)
-  s.name = "config." + args.format
+  s.name = str(uuid.uuid4()) + "." + args.format
 
   # load and evaluate config
   config = load(s)

@@ -68,5 +68,8 @@ def env(variable_name):
   variable_name : str
       environment variable name
   """
-  return os.environ[variable_name]
+  if variable_name in os.environ:
+    return os.environ[variable_name]
+  else:
+    return None
 

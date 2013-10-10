@@ -85,7 +85,7 @@ class required(variable):
         isinstance(other, required)
 
 
-def one_of(**options):
+def one_of(*options):
   """is this object one of these options?"""
   def type(obj):
     if not obj in options:
