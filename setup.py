@@ -1,8 +1,10 @@
 from setuptools import setup, find_packages
 
+import configurati
+
 setup(
     name         = 'configurati',
-    version      = '0.2.0',
+    version      =  configurati.__version__,
     author       = 'Daniel Duckworth',
     author_email = 'duckworthd@gmail.com',
     description  = 'Configuration files for Python',
@@ -19,7 +21,9 @@ setup(
       'Programming Language :: Python :: Implementation :: CPython',
       'Topic :: Software Development :: Libraries',
     ],
-    install_requires = [],
+    install_requires = [
+      'PyYAML>=3.10',
+    ],
     tests_require    = [
       'nose',
     ]
