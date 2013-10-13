@@ -1,10 +1,8 @@
 from setuptools import setup, find_packages
 
-import configurati
-
 setup(
     name         = 'configurati',
-    version      =  configurati.__version__,
+    version      = '0.2.2',
     author       = 'Daniel Duckworth',
     author_email = 'duckworthd@gmail.com',
     description  = 'Configuration files for Python',
