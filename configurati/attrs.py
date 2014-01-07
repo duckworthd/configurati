@@ -20,6 +20,19 @@ class adict(dict):
     self[key] = value
     return self[key]
 
+  def to_dict(self):
+    f = lambda x: dict(x) if isinstance(x, attrs) else x
+    return recursive_apply(self, value_func=f)
+
+  @classmethod
+  def from_dict(cls, d):
+    f = lambda x: cls(x) if isinstance(x, dict) else x
+    return recursive_apply(d, value_func=f)
+
+  def unroll(self):
+    unrolled = unroll(self)
+    return { k[1:]:v for k, v in unrolled.items() }
+
 
 class attrs(adict):
   """A dictionary/object designed for nested objects"""
@@ -68,18 +81,6 @@ class attrs(adict):
     except:
       return False
 
-  def to_dict(self):
-    f = lambda x: dict(x) if isinstance(x, attrs) else x
-    return recursive_apply(self, value_func=f)
-
-  @staticmethod
-  def from_dict(d):
-    f = lambda x: attrs(x) if isinstance(x, dict) else x
-    return recursive_apply(d, value_func=f)
-
-  def unroll(self):
-    unrolled = unroll(self)
-    return { k[1:]:v for k, v in unrolled.items() }
 
 
 def is_atomic(key):
